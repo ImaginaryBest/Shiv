@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Highway Food Bytes</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F4F6F0;color:#1a1a1a;min-height:100vh;}
+.app{max-width:430px;margin:0 auto;background:#F4F6F0;min-height:100vh;}
+
+/* TOPBAR */
+.topbar{background:linear-gradient(135deg,#2d5a0e,#3B6D11);padding:14px 18px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:20;}
+.logo-icon{width:34px;height:34px;background:rgba(255,255,255,.15);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;}
+.logo-text{font-size:15px;font-weight:800;color:#fff;line-height:1.2;}
+.logo-sub{font-size:10px;color:rgba(255,255,255,.7);}
+.pwr-btn{margin-left:auto;background:rgba(255,255,255,.18);border:none;color:#fff;font-size:11px;font-weight:700;padding:4px 11px;border-radius:20px;cursor:pointer;}
+.pwr-btn.on{background:rgba(255,255,255,.38);}
+
+/* SCREENS */
+.screen{display:none;} .screen.active{display:block;}
+
+/* INPUT */
+.inp-wrap{padding:20px 16px;}
+.hero{text-align:center;padding:18px 0 22px;}
+.hero h1{font-size:24px;font-weight:800;color:#1a1a1a;line-height:1.3;}
+.hero p{font-size:13px;color:#6b7a5e;margin-top:8px;line-height:1.6;}
+
+.chips-title{font-size:11px;font-weight:700;color:#6b7a5e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:18px;}
+.chip{font-size:12px;padding:6px 12px;border-radius:20px;background:#fff;border:1.5px solid #C8DFB0;color:#3B6D11;cursor:pointer;font-weight:600;}
+.chip:active{background:#EAF3DE;}
+
+.form-card{background:#fff;border-radius:18px;padding:18px;box-shadow:0 3px 12px rgba(0,0,0,.07);margin-bottom:14px;}
+.field{margin-bottom:14px;} .field:last-child{margin-bottom:0;}
+.field label{font-size:11px;font-weight:700;color:#6b7a5e;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;}
+.field input{width:100%;padding:11px 13px;border:1.5px solid #E0E8D5;border-radius:11px;font-size:15px;outline:none;background:#FAFCF7;color:#1a1a1a;}
+.field input:focus{border-color:#3B6D11;}
+.rrow{display:flex;align-items:center;gap:9px;}
+.rdot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.now-btn{font-size:12px;font-weight:700;color:#3B6D11;background:#EAF3DE;border:none;padding:7px 12px;border-radius:8px;cursor:pointer;white-space:nowrap;}
+
+.plan-btn{width:100%;padding:14px;background:linear-gradient(135deg,#3B6D11,#4a8a16);color:#fff;border:none;border-radius:13px;font-size:16px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 14px rgba(59,109,17,.3);}
+.plan-btn:active{transform:scale(.98);}
+.trust{display:flex;justify-content:center;gap:16px;margin-top:14px;}
+.ti{font-size:11px;color:#8a9a7a;}
+
+/* LOADING */
+.load-wrap{text-align:center;padding:60px 20px;}
+.spinner{width:48px;height:48px;border:3px solid #E0E8D5;border-top-color:#3B6D11;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 18px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.load-wrap h2{font-size:17px;font-weight:700;margin-bottom:8px;}
+.load-step{font-size:13px;color:#6b7a5e;}
+.load-bar{width:210px;height:5px;background:#E0E8D5;border-radius:5px;margin:14px auto 0;overflow:hidden;}
+.load-fill{height:100%;background:linear-gradient(90deg,#3B6D11,#6aad28);border-radius:5px;width:0;transition:width .5s;}
+
+/* RESULT */
+.res-wrap{padding:16px;}
+.res-header{background:linear-gradient(135deg,#2d5a0e,#3B6D11);border-radius:18px;padding:16px 18px;margin-bottom:12px;color:#fff;}
+.res-route-lbl{font-size:12px;color:rgba(255,255,255,.7);margin-bottom:3px;}
+.res-title{font-size:19px;font-weight:800;}
+.res-meta{display:flex;gap:7px;margin-top:9px;flex-wrap:wrap;}
+.rm{font-size:11px;background:rgba(255,255,255,.2);color:#fff;padding:3px 9px;border-radius:20px;font-weight:600;}
+.rm-warn{background:rgba(255,80,80,.35);}
+.rm-early{background:rgba(255,200,0,.35);}
+
+.eta-bar{background:#fff;border-radius:13px;padding:11px 14px;margin-bottom:12px;display:flex;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.eta-item{flex:1;text-align:center;}
+.eta-item+.eta-item{border-left:1px solid #E8EDE0;}
+.eta-val{font-size:15px;font-weight:800;color:#3B6D11;}
+.eta-lbl{font-size:10px;color:#8a9a7a;margin-top:2px;text-transform:uppercase;letter-spacing:.3px;}
+
+.notice{background:#FFF8E1;border:1.5px solid #FFD54F;border-radius:12px;padding:11px 14px;margin-bottom:12px;font-size:12px;color:#6B4A00;line-height:1.6;}
+.notice strong{display:block;font-size:13px;margin-bottom:2px;}
+
+/* STOP CARD */
+.stop-card{background:#fff;border-radius:16px;overflow:hidden;margin-bottom:12px;box-shadow:0 2px 12px rgba(0,0,0,.07);}
+.sc-best{border-left:5px solid #3B6D11;}
+.sc-good{border-left:5px solid #F5A623;}
+.sc-miss{border-left:5px solid #E24B4A;}
+.sc-closed{border-left:5px solid #9E9E9E;opacity:.82;}
+
+/* stop header strip — replaces image */
+.s-header{padding:12px 14px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #F0F4EC;}
+.s-emoji{font-size:32px;flex-shrink:0;}
+.s-header-info{flex:1;}
+.s-name{font-size:14px;font-weight:800;color:#1a1a1a;line-height:1.3;}
+.s-area{font-size:11px;color:#8a9a7a;margin-top:2px;}
+.snum{font-size:10px;font-weight:700;background:#3B6D11;color:#fff;padding:2px 8px;border-radius:20px;white-space:nowrap;}
+.sbadge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;color:#fff;white-space:nowrap;}
+.sb-legend{background:#B8860B;}
+.sb-mns{background:linear-gradient(135deg,#FF6B00,#FFD700);color:#fff;}
+.sb-best{background:#3B6D11;}
+.sb-closed{background:#555;}
+.sb-early{background:#D06B00;}
+
+.sbody{padding:12px 14px 14px;}
+.srow{display:flex;gap:9px;align-items:flex-start;margin-bottom:9px;}
+.srow:last-child{margin-bottom:0;}
+.sico{font-size:15px;flex-shrink:0;margin-top:1px;}
+.slbl{font-size:10px;font-weight:700;color:#8a9a7a;text-transform:uppercase;letter-spacing:.3px;}
+.sval{font-size:13px;color:#1a1a1a;margin-top:2px;line-height:1.45;}
+.sval a{color:#3B6D11;font-weight:600;text-decoration:none;}
+
+.fpill{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;margin-top:3px;}
+.fp-best{background:#C0DD97;color:#27500A;}
+.fp-good{background:#FAE5B0;color:#6B4A00;}
+.fp-miss{background:#F7C1C1;color:#791F1F;}
+.fp-closed{background:#E0E0E0;color:#555;}
+
+.mns-alert{background:linear-gradient(135deg,#FF6B00,#FFD700);border-radius:10px;padding:10px 12px;margin-top:9px;display:flex;align-items:flex-start;gap:8px;}
+.mns-alert-ico{font-size:18px;flex-shrink:0;}
+.mns-alert-txt{font-size:12px;color:#3D1C00;line-height:1.5;font-weight:600;}
+
+.nearby-box{background:#FFF8E1;border-radius:10px;padding:10px 12px;margin-top:9px;border:1px solid #FFE082;font-size:12px;color:#6B4A00;line-height:1.5;}
+.nearby-lbl{font-size:10px;font-weight:700;color:#F57F17;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;}
+
+.action-row{display:flex;gap:7px;margin-top:11px;}
+.abtn{flex:1;padding:8px 4px;border:none;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;}
+.abtn-map{background:#E8F4FD;color:#1565C0;}
+.abtn-call{background:#E8F5E9;color:#2E7D32;}
+.abtn-share{background:#E8F5E9;color:#25D366;}
+
+/* TIPS */
+.tips-card{background:#1a2e0a;border-radius:16px;padding:16px;margin-bottom:12px;}
+.tips-title{font-size:13px;font-weight:700;color:#C0DD97;margin-bottom:12px;}
+.tip-row{margin-bottom:9px;} .tip-row:last-child{margin-bottom:0;}
+.tip-lbl{font-size:10px;color:#7a9a5a;text-transform:uppercase;letter-spacing:.4px;font-weight:700;margin-bottom:2px;}
+.tip-val{font-size:12px;color:#EAF3DE;line-height:1.5;}
+
+.share-btn{width:100%;padding:13px;background:#25D366;color:#fff;border:none;border-radius:13px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:11px;box-shadow:0 3px 12px rgba(37,211,102,.3);}
+
+.ai-badge{display:flex;align-items:center;gap:6px;justify-content:center;padding:9px;font-size:11px;color:#8a9a7a;margin-bottom:7px;}
+.ai-dot{width:6px;height:6px;border-radius:50%;background:#3B6D11;animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.25;}}
+
+/* FEEDBACK */
+.fb-card{background:#fff;border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 2px 10px rgba(0,0,0,.07);}
+.fb-title{font-size:14px;font-weight:700;margin-bottom:11px;}
+.fb-btns{display:flex;gap:7px;margin-bottom:11px;}
+.fbtn{flex:1;padding:9px 4px;border-radius:11px;font-size:13px;font-weight:700;cursor:pointer;border:2px solid transparent;}
+.fbtn-yes{background:#EAF3DE;color:#3B6D11;border-color:#C0DD97;}
+.fbtn-ok{background:#FFF8E1;color:#6B4A00;border-color:#FFD54F;}
+.fbtn-no{background:#FFF0F0;color:#A32D2D;border-color:#F7C1C1;}
+.fbtn.sel{transform:scale(1.05);}
+.fb-input{width:100%;border:1.5px solid #E0E8D5;border-radius:9px;padding:9px 11px;font-size:13px;font-family:inherit;resize:none;outline:none;background:#FAFCF7;color:#1a1a1a;margin-bottom:7px;}
+.fb-submit{width:100%;padding:9px;background:#3B6D11;color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;}
+.fb-thanks{font-size:12px;color:#3B6D11;font-weight:600;margin-top:7px;text-align:center;min-height:15px;}
+
+.new-route-btn{width:100%;padding:12px;background:#fff;color:#3B6D11;border:2px solid #3B6D11;border-radius:13px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:22px;}
+
+/* POWER USER */
+.pwr-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100;align-items:center;justify-content:center;}
+.pwr-overlay.open{display:flex;}
+.pwr-modal{background:#fff;border-radius:20px;width:92%;max-width:400px;max-height:88vh;overflow-y:auto;}
+.pwr-login{padding:26px 22px;}
+.pwr-login-icon{width:52px;height:52px;background:#EAF3DE;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 10px;}
+.pwr-login h2{font-size:17px;font-weight:800;text-align:center;margin-bottom:4px;}
+.pwr-login p{font-size:13px;color:#6b7a5e;text-align:center;margin-bottom:18px;}
+.pwr-err{background:#FFF0F0;border:1px solid #F7C1C1;border-radius:9px;padding:9px 12px;font-size:12px;color:#791F1F;margin-bottom:12px;display:none;}
+.pwr-pin{width:100%;padding:12px 14px;border:1.5px solid #E0E8D5;border-radius:11px;font-size:18px;letter-spacing:8px;outline:none;background:#FAFCF7;margin-bottom:14px;}
+.pwr-btns{display:flex;gap:8px;}
+.pwr-cancel{flex:1;padding:11px;background:#F4F6F0;color:#6b7a5e;border:none;border-radius:11px;font-size:14px;font-weight:700;cursor:pointer;}
+.pwr-login-btn{flex:2;padding:11px;background:linear-gradient(135deg,#3B6D11,#4a8a16);color:#fff;border:none;border-radius:11px;font-size:14px;font-weight:700;cursor:pointer;}
+.pwr-hint{text-align:center;margin-top:12px;font-size:11px;color:#8a9a7a;}
+.pwr-dash-hdr{background:linear-gradient(135deg,#2d5a0e,#3B6D11);padding:16px 18px;border-radius:20px 20px 0 0;display:flex;align-items:center;gap:8px;}
+.pwr-dash-title{flex:1;font-size:15px;font-weight:800;color:#fff;}
+.pwr-dash-sub{font-size:10px;color:rgba(255,255,255,.7);}
+.pwr-close{background:rgba(255,255,255,.18);border:none;color:#fff;font-size:17px;width:28px;height:28px;border-radius:50%;cursor:pointer;}
+.pwr-tabs{display:flex;border-bottom:1px solid #E8EDE0;}
+.ptab{flex:1;padding:10px 2px;font-size:11px;font-weight:700;border:none;background:transparent;color:#6b7a5e;cursor:pointer;border-bottom:2px solid transparent;}
+.ptab.on{color:#3B6D11;border-bottom-color:#3B6D11;}
+.pwr-panel{display:none;padding:15px;}
+.pwr-panel.on{display:block;}
+.pmet-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px;}
+.pmet{background:#F4F6F0;border-radius:11px;padding:11px;text-align:center;}
+.pmet-val{font-size:19px;font-weight:800;}
+.pmet-lbl{font-size:10px;color:#6b7a5e;margin-top:2px;text-transform:uppercase;letter-spacing:.4px;}
+.pmet-d{font-size:10px;font-weight:700;margin-top:3px;}
+.pmet-d.up{color:#3B6D11;} .pmet-d.dn{color:#A32D2D;}
+.psec-title{font-size:12px;font-weight:700;color:#3B6D11;margin:13px 0 8px;}
+.pbar-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.pbar-lbl{font-size:11px;color:#6b7a5e;min-width:112px;}
+.pbar-track{flex:1;height:7px;background:#E8EDE0;border-radius:4px;overflow:hidden;}
+.pbar-fill{height:100%;border-radius:4px;}
+.pbar-n{font-size:11px;font-weight:700;min-width:28px;text-align:right;}
+.pstop-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #F0F4EC;}
+.pstop-row:last-child{border-bottom:none;}
+.pscore{font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;}
+.ps-g{background:#EAF3DE;color:#3B6D11;} .ps-a{background:#FFF8E1;color:#6B4A00;} .ps-r{background:#FFF0F0;color:#A32D2D;}
+.pcmt{padding:9px 0;border-bottom:1px solid #F0F4EC;}
+.pcmt:last-child{border-bottom:none;}
+.pcmt-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px;}
+.pctag{font-size:10px;padding:2px 7px;border-radius:20px;}
+.pct-praise{background:#E8F4FD;color:#1565C0;} .pct-timing{background:#EAF3DE;color:#3B6D11;} .pct-missing{background:#FFF8E1;color:#6B4A00;} .pct-wrong{background:#FFF0F0;color:#A32D2D;}
+.pfchip{font-size:11px;padding:4px 9px;border-radius:20px;border:1px solid #D8E5C8;background:#fff;color:#3B6D11;cursor:pointer;}
+.pfchip.on{background:#EAF3DE;font-weight:700;}
+.pset-row{display:flex;align-items:center;gap:9px;padding:11px 0;border-bottom:1px solid #F0F4EC;}
+.pset-row:last-of-type{border-bottom:none;}
+.pset-lbl{flex:1;font-size:13px;}
+.ptog{width:38px;height:21px;border-radius:11px;background:#D0D8C5;position:relative;cursor:pointer;flex-shrink:0;transition:background .2s;}
+.ptog.on{background:#3B6D11;}
+.ptog-knob{position:absolute;top:2.5px;left:2.5px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .2s;}
+.ptog.on .ptog-knob{left:20px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo-icon">🛣️</div>
+  <div>
+    <div class="logo-text">Highway Food Bytes</div>
+    <div class="logo-sub">Your Highway Food Companion</div>
+  </div>
+  <button class="pwr-btn" id="pwrBtn" onclick="openPwr()">⚙ Power</button>
+</div>
+
+<!-- INPUT -->
+<div id="scInput" class="screen active">
+<div class="inp-wrap">
+  <div class="hero">
+    <h1>Highway Food Bytes 🛣️</h1>
+    <p>The right food, at the right time,<br>on the right route.</p>
+  </div>
+
+  <div class="chips-title">Popular routes</div>
+  <div class="chips">
+    <span class="chip" onclick="fillRoute('Bangalore','Mysore')">🏛 Bangalore → Mysore</span>
+    <span class="chip" onclick="fillRoute('Bangalore','Hubli')">🍬 Bangalore → Hubli</span>
+    <span class="chip" onclick="fillRoute('Bangalore','Coorg')">🌿 Bangalore → Coorg</span>
+    <span class="chip" onclick="fillRoute('Mumbai','Pune')">🌆 Mumbai → Pune</span>
+  </div>
+
+  <div class="form-card">
+    <div class="field">
+      <label>📍 From</label>
+      <div class="rrow">
+        <div class="rdot" style="background:#3B6D11"></div>
+        <input id="inFrom" type="text" placeholder="e.g. Bangalore">
+      </div>
+    </div>
+    <div class="field">
+      <label>🏁 To</label>
+      <div class="rrow">
+        <div class="rdot" style="background:#A32D2D"></div>
+        <input id="inTo" type="text" placeholder="e.g. Mysore">
+      </div>
+    </div>
+    <div class="field">
+      <label>🕐 Departure time</label>
+      <div class="rrow">
+        <input id="inTime" type="time" value="07:30" style="flex:1">
+        <button class="now-btn" onclick="setNow()">Leave now</button>
+      </div>
+    </div>
+  </div>
+  <button class="plan-btn" onclick="startPlan()">🗺 Find my sweet stops</button>
+  <div class="trust">
+    <div class="ti">⏱ Real ETA timing</div>
+    <div class="ti">📍 Famous eateries</div>
+    <div class="ti">🍽 Local picks</div>
+  </div>
+</div>
+</div>
+
+<!-- LOADING -->
+<div id="scLoading" class="screen">
+  <div class="load-wrap">
+    <div class="spinner"></div>
+    <h2>Finding your sweet stops…</h2>
+    <div class="load-step" id="ldStep">Calculating journey time…</div>
+    <div class="load-bar"><div class="load-fill" id="ldFill"></div></div>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div id="scResult" class="screen">
+  <div class="res-wrap">
+    <div id="resultContent"></div>
+    <button class="new-route-btn" onclick="resetApp()">← Plan another route</button>
+  </div>
+</div>
+
+<!-- POWER USER MODAL -->
+<div class="pwr-overlay" id="pwrOverlay">
+  <div class="pwr-modal">
+    <div id="pwrLogin" class="pwr-login">
+      <div class="pwr-login-icon">⚙</div>
+      <h2>Power user login</h2>
+      <p>Access feedback analytics &amp; admin tools</p>
+      <div class="pwr-err" id="pwrErr">Incorrect PIN. Try again.</div>
+      <input class="pwr-pin" id="pwrPin" type="password" inputmode="numeric" maxlength="4" placeholder="4-digit PIN" onkeydown="if(event.key==='Enter')doLogin()">
+      <div class="pwr-btns">
+        <button class="pwr-cancel" onclick="closePwr()">Cancel</button>
+        <button class="pwr-login-btn" onclick="doLogin()">Login →</button>
+      </div>
+      <div class="pwr-hint">Default PIN: <strong>1234</strong></div>
+    </div>
+    <div id="pwrDash" style="display:none">
+      <div class="pwr-dash-hdr">
+        <div>
+          <div class="pwr-dash-title">Power Dashboard</div>
+          <div class="pwr-dash-sub">Feedback analytics · Admin tools</div>
+        </div>
+        <button class="pwr-close" onclick="closePwr()">✕</button>
+      </div>
+      <div class="pwr-tabs">
+        <button class="ptab on" onclick="pTab('analytics',this)">📊 Analytics</button>
+        <button class="ptab" onclick="pTab('stops',this)">📍 Stops</button>
+        <button class="ptab" onclick="pTab('comments',this)">💬 Comments</button>
+        <button class="ptab" onclick="pTab('settings',this)">⚙ Settings</button>
+      </div>
+      <div id="pp-analytics" class="pwr-panel on">
+        <div class="pmet-grid">
+          <div class="pmet"><div class="pmet-val">4.2</div><div class="pmet-lbl">Avg rating</div><div class="pmet-d up">↑ 0.3 this wk</div></div>
+          <div class="pmet"><div class="pmet-val">1,284</div><div class="pmet-lbl">Total ratings</div><div class="pmet-d up">↑ 12% vs last wk</div></div>
+          <div class="pmet"><div class="pmet-val">73%</div><div class="pmet-lbl">Loved it</div><div class="pmet-d up">↑ 5pp</div></div>
+          <div class="pmet"><div class="pmet-val">11%</div><div class="pmet-lbl">Needs work</div><div class="pmet-d dn">↓ 2pp</div></div>
+        </div>
+        <div class="psec-title">Rating breakdown</div>
+        <div class="pbar-row"><div class="pbar-lbl">👍 Loved it</div><div class="pbar-track"><div class="pbar-fill" style="width:100%;background:#3B6D11"></div></div><div class="pbar-n">937</div></div>
+        <div class="pbar-row"><div class="pbar-lbl">😐 It's okay</div><div class="pbar-track"><div class="pbar-fill" style="width:23%;background:#F5A623"></div></div><div class="pbar-n">219</div></div>
+        <div class="pbar-row"><div class="pbar-lbl">👎 Needs work</div><div class="pbar-track"><div class="pbar-fill" style="width:14%;background:#E24B4A"></div></div><div class="pbar-n">128</div></div>
+        <div class="psec-title">Top feedback themes</div>
+        <div class="pbar-row"><div class="pbar-lbl">Timing was perfect</div><div class="pbar-track"><div class="pbar-fill" style="width:100%;background:#3B6D11"></div></div><div class="pbar-n">412</div></div>
+        <div class="pbar-row"><div class="pbar-lbl">Great guide tips</div><div class="pbar-track"><div class="pbar-fill" style="width:94%;background:#3B6D11"></div></div><div class="pbar-n">389</div></div>
+        <div class="pbar-row"><div class="pbar-lbl">Stop was closed</div><div class="pbar-track"><div class="pbar-fill" style="width:45%;background:#E24B4A"></div></div><div class="pbar-n">187</div></div>
+        <div class="pbar-row"><div class="pbar-lbl">Missing stop</div><div class="pbar-track"><div class="pbar-fill" style="width:35%;background:#F5A623"></div></div><div class="pbar-n">143</div></div>
+      </div>
+      <div id="pp-stops" class="pwr-panel">
+        <div class="psec-title">Stop accuracy scores</div>
+        <div id="pp-stop-list"></div>
+      </div>
+      <div id="pp-comments" class="pwr-panel">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:11px" id="pp-filters">
+          <span class="pfchip on" onclick="pdFilter('all',this)">All</span>
+          <span class="pfchip" onclick="pdFilter('timing',this)">Timing</span>
+          <span class="pfchip" onclick="pdFilter('missing',this)">Missing</span>
+          <span class="pfchip" onclick="pdFilter('wrong',this)">Wrong info</span>
+          <span class="pfchip" onclick="pdFilter('praise',this)">Praise</span>
+        </div>
+        <div id="pp-comments-list"></div>
+      </div>
+      <div id="pp-settings" class="pwr-panel">
+        <div class="psec-title">Admin controls</div>
+        <div class="pset-row"><div class="pset-lbl">Show feedback button to all users</div><div class="ptog on" onclick="this.classList.toggle('on')"><div class="ptog-knob"></div></div></div>
+        <div class="pset-row"><div class="pset-lbl">Collect anonymous usage data</div><div class="ptog on" onclick="this.classList.toggle('on')"><div class="ptog-knob"></div></div></div>
+        <div class="pset-row"><div class="pset-lbl">Show alerts for needs work ratings</div><div class="ptog" onclick="this.classList.toggle('on')"><div class="ptog-knob"></div></div></div>
+        <div class="pset-row"><div class="pset-lbl">Weekly email feedback digest</div><div class="ptog on" onclick="this.classList.toggle('on')"><div class="ptog-knob"></div></div></div>
+        <div class="psec-title">Change PIN</div>
+        <input id="newPin" type="password" inputmode="numeric" maxlength="4" placeholder="New 4-digit PIN" style="width:100%;padding:10px 12px;border:1.5px solid #E0E8D5;border-radius:9px;font-size:15px;letter-spacing:6px;outline:none;background:#FAFCF7;margin-bottom:9px;">
+        <button onclick="changePin()" style="width:100%;padding:10px;background:#3B6D11;color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;">Update PIN</button>
+        <div id="pinMsg" style="font-size:12px;color:#3B6D11;text-align:center;margin-top:7px;min-height:15px;"></div>
+        <div style="display:flex;justify-content:center;margin-top:16px;padding-top:14px;border-top:1px solid #E8EDE0;">
+          <button onclick="doLogout()" style="padding:9px 22px;background:#FFF0F0;color:#A32D2D;border:1px solid #F7C1C1;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;">Log out</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+<script>
+// ── Helpers ───────────────────────────────────────────────────────
+function show(id){
+  var s=['scInput','scLoading','scResult'];
+  for(var i=0;i<s.length;i++) document.getElementById(s[i]).classList.remove('active');
+  document.getElementById(id).classList.add('active');
+}
+function fillRoute(f,t){document.getElementById('inFrom').value=f;document.getElementById('inTo').value=t;}
+function setNow(){var n=new Date();document.getElementById('inTime').value=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');}
+function resetApp(){show('scInput');document.getElementById('resultContent').innerHTML='';}
+function toMins(t){var p=t.split(':');return parseInt(p[0])*60+parseInt(p[1]);}
+function addMins(t,n){var v=toMins(t)+n;var h=Math.floor(v/60)%24,m=v%60;return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');}
+function fmt12(t){var p=t.split(':');var h=parseInt(p[0]),m=parseInt(p[1]);var ap=h<12?'AM':'PM';h=h%12||12;return h+':'+String(m).padStart(2,'0')+' '+ap;}
+function fmtDur(mins){var h=Math.floor(mins/60),m=mins%60;if(h>0&&m>0)return h+'h '+m+'m';if(h>0)return h+'h';return m+'m';}
+function winStatus(arr,win){
+  var p=win.split('–');
+  function p12(s){s=s.trim();var m=s.match(/(\d+):(\d+)\s*(AM|PM)/i);if(!m)return 0;var h=parseInt(m[1]),mn=parseInt(m[2]),ap=m[3].toUpperCase();if(ap==='PM'&&h!==12)h+=12;if(ap==='AM'&&h===12)h=0;return h*60+mn;}
+  var op=p12(p[0]),cl=p12(p[1]),ar=toMins(arr);
+  if(ar<op)return'early';if(ar>cl)return'closed';
+  return Math.abs(ar-(op+cl)/2)<=(cl-op)/4?'best':'good';
+}
+
+// ── Food emoji map ────────────────────────────────────────────────
+function stopEmoji(item, special){
+  if(special==='legend'||special==='mns') return '🟡';
+  var l=item.toLowerCase();
+  if(l.indexOf('mysore pak')>=0||l.indexOf('badhusha')>=0) return '🟠';
+  if(l.indexOf('maddur')>=0||l.indexOf('vade')>=0||l.indexOf('vada')>=0) return '🟡';
+  if(l.indexOf('dosa')>=0||l.indexOf('benne')>=0) return '🫓';
+  if(l.indexOf('idli')>=0||l.indexOf('tatte')>=0) return '⚪';
+  if(l.indexOf('coffee')>=0||l.indexOf('chai')>=0||l.indexOf('tea')>=0) return '☕';
+  if(l.indexOf('peda')>=0||l.indexOf('pedha')>=0) return '🍮';
+  if(l.indexOf('ladoo')>=0||l.indexOf('laddu')>=0||l.indexOf('chikki')>=0) return '🟤';
+  if(l.indexOf('holige')>=0||l.indexOf('obbattu')>=0) return '🫓';
+  if(l.indexOf('jolada')>=0||l.indexOf('rotti')>=0) return '🫓';
+  if(l.indexOf('pav')>=0) return '🍞';
+  if(l.indexOf('bakarwadi')>=0||l.indexOf('shrikhand')>=0) return '🟡';
+  return '🍽';
+}
+
+// ── Route data ────────────────────────────────────────────────────
+var ROUTE_META = {
+'bangalore-mysore':{totalKm:140,totalMins:150,wp:[
+  {city:'Ramanagara',km:48,dm:50,e:[
+    {n:'Shri Janardhan Hotel',a:'Ramanagara',it:'Traditional Mysore Pak (since 1926)',w:'6:30 AM – 12:00 PM',bf:.97,c:'High',det:0,sp:'legend',ph:'080-27252525',mp:'https://maps.google.com/?q=Shri+Janardhan+Hotel+Ramanagara',wb:'Morning ghee batch — the 1926 original. Non-negotiable first stop.',wg:'Quality never dips, queue shorter now.',we:'Opening soon — be first in line.',wc:'Depart before 11 AM next time.',nb:'Kamat Lokaruchi (500m) open till 3 PM.'}
+  ]},
+  {city:'Maddur',km:100,dm:95,e:[
+    {n:'Hotel Maddur Tiffany',a:'Maddur (NH-275)',it:'Maddur Vade + Filter Coffee',w:'6:30 AM – 3:00 PM',bf:.87,c:'High',det:2,ph:'08232-236655',mp:'https://maps.google.com/?q=Hotel+Maddur+Tiffany+Maddur',wb:'The iconic Maddur landmark — vadas from oil with fresh chutney.',wg:'Past peak but Tiffany holds quality well.',we:'Opening soon — great for morning batch.',wc:'Try MNS Mixture if timing works.',nb:'MNS Mixture (500m) — best vada, 2:30–3:30 PM only.'},
+    {n:'MNS Mixture ⭐',a:'Maddur Town',it:'Maddur Vade (Limited Batch — best in town!)',w:'2:30 PM – 3:30 PM',bf:.99,c:'High',det:8,sp:'mns',ph:'N/A',mp:'https://maps.google.com/?q=MNS+Mixture+Maddur',wb:'One batch per day, 2:30 PM sharp. The best Maddur Vada anywhere — sold out in 2 hrs.',wg:'Still available but selling fast — rush now!',we:'Not open yet. Stop at Tiffany first, return at 2:30 PM sharp.',wc:'Sold out — no second batch ever made. Try Tiffany instead.',nb:'Hotel Maddur Tiffany (500m) as fallback.'}
+  ]},
+  {city:'Mysore',km:140,dm:150,e:[
+    {n:'Guru Sweet Mart',a:'Mysore',it:'Mysore Pak Special + Badhusha',w:'9:00 AM – 7:00 PM',bf:.95,c:'High',det:5,ph:'0821-2441234',mp:'https://maps.google.com/?q=Guru+Sweet+Mart+Mysore',wb:'Arrival treat — fresh ghee batch, crumbly perfection.',wg:'Morning stock available till 3 PM.',we:'5 mins early — stroll the street.',wc:'Chandrika Sweets (500m) as backup.',nb:'Chandrika Sweets (400m).'},
+    {n:'Mylari Dosa',a:'Mysore',it:'Mysore Masala Dosa + Coconut Chutney',w:'7:30 AM – 1:00 PM',bf:.88,c:'High',det:3,ph:'0821-2444567',mp:'https://maps.google.com/?q=Mylari+Dosa+Mysore',wb:'Peak breakfast — batter at best fermentation.',wg:'Late morning, shorter wait, quality still top.',we:'Warming up — worth 10 min wait.',wc:'Morning-only. Hotel RRR (800m) for meals.',nb:'Hotel RRR Mysore (800m).'}
+  ]}
+]},
+'bangalore-coorg':{totalKm:280,totalMins:330,wp:[
+  {city:'Ramanagara',km:48,dm:50,e:[
+    {n:'Shri Janardhan Hotel',a:'Ramanagara',it:'Traditional Mysore Pak (since 1926)',w:'6:30 AM – 12:00 PM',bf:.97,c:'High',det:0,sp:'legend',ph:'080-27252525',mp:'https://maps.google.com/?q=Shri+Janardhan+Hotel+Ramanagara',wb:'Start the Coorg drive — morning ghee batch, 1926 recipe.',wg:'Always excellent.',we:'Opening soon.',wc:'Depart before 11 AM.',nb:'Kamat Lokaruchi (500m).'}
+  ]},
+  {city:'Maddur',km:100,dm:95,e:[
+    {n:'Hotel Maddur Tiffany',a:'Maddur (NH-275)',it:'Maddur Vade + Coconut Burfi',w:'6:30 AM – 3:00 PM',bf:.87,c:'High',det:2,ph:'08232-236655',mp:'https://maps.google.com/?q=Hotel+Maddur+Tiffany+Maddur',wb:'Peak frying — vadas from oil, crispy outside soft inside.',wg:'Past peak but still good.',we:'Opening soon.',wc:'MNS Mixture (500m) if 2:30–3:30 PM window fits.',nb:'MNS Mixture (500m) 2:30–3:30 PM only.'},
+    {n:'MNS Mixture ⭐',a:'Maddur Town',it:'Maddur Vade (Limited Batch — best in town!)',w:'2:30 PM – 3:30 PM',bf:.99,c:'High',det:8,sp:'mns',ph:'N/A',mp:'https://maps.google.com/?q=MNS+Mixture+Maddur',wb:'One batch per day. The best Maddur Vada — sold out in 2 hrs. Time your Coorg drive to hit Maddur by 2:30 PM.',wg:'Still selling — rush now!',we:'Not open. Stop at Tiffany first, return at 2:30 PM.',wc:'Sold out. Tiffany (500m) as fallback.',nb:'Hotel Maddur Tiffany (500m).'}
+  ]},
+  {city:'Mysore',km:140,dm:150,e:[
+    {n:'Guru Sweet Mart',a:'Mysore',it:'Mysore Pak + Badhusha',w:'9:00 AM – 7:00 PM',bf:.92,c:'High',det:5,ph:'0821-2441234',mp:'https://maps.google.com/?q=Guru+Sweet+Mart+Mysore',wb:'Great midway break — fresh ghee Mysore Pak.',wg:'Stock available all morning.',we:'Almost open.',wc:'Chandrika Sweets (400m).',nb:'Chandrika Sweets (400m).'}
+  ]},
+  {city:'Kushalnagar',km:230,dm:270,e:[
+    {n:'Ambara Sweets',a:'Kushalnagar',it:'Atti Payasa + Kadubu',w:'11:00 AM – 6:00 PM',bf:.80,c:'Medium',det:0,ph:'08276-274321',mp:'https://maps.google.com/?q=Ambara+Sweets+Kushalnagar',wb:'Coorg gateway — payasa fresh, kadubu in jackfruit leaves.',wg:'Good afternoon stock.',we:'Not open yet.',wc:'Hotel Coorg International (1km).',nb:'Hotel Coorg International (1km).'}
+  ]},
+  {city:'Madikeri',km:280,dm:330,e:[
+    {n:'Coorg Cuisine',a:'Madikeri',it:'Pandi Curry + Akki Rotti',w:'12:00 PM – 4:00 PM',bf:.85,c:'High',det:5,ph:'08272-225678',mp:'https://maps.google.com/?q=Coorg+Cuisine+Madikeri',wb:'Authentic Kodava lunch — pandi curry & akki rotti freshly made.',wg:'Good lunch window.',we:'Lunch not started yet.',wc:'Orange County restaurant (2km).',nb:'Orange County Resort restaurant (2km).'}
+  ]}
+]},
+'bangalore-ooty':{totalKm:295,totalMins:360,wp:[
+  {city:'Ramanagara',km:48,dm:50,e:[
+    {n:'Shri Janardhan Hotel',a:'Ramanagara',it:'Traditional Mysore Pak (since 1926)',w:'6:30 AM – 12:00 PM',bf:.97,c:'High',det:0,sp:'legend',ph:'080-27252525',mp:'https://maps.google.com/?q=Shri+Janardhan+Hotel+Ramanagara',wb:'Start Ooty drive with legendary ghee Mysore Pak.',wg:'Always excellent.',we:'Opening soon.',wc:'Depart before 11 AM.',nb:'Kamat Lokaruchi (500m).'}
+  ]},
+  {city:'Mysore',km:140,dm:150,e:[
+    {n:'Guru Sweet Mart',a:'Mysore',it:'Mysore Pak + Badhusha',w:'9:00 AM – 7:00 PM',bf:.92,c:'High',det:5,ph:'0821-2441234',mp:'https://maps.google.com/?q=Guru+Sweet+Mart+Mysore',wb:'Midway sweet stop — pure ghee Mysore Pak.',wg:'Good stock till 3 PM.',we:'5 min wait.',wc:'Chandrika Sweets (400m).',nb:'Chandrika Sweets (400m).'}
+  ]},
+  {city:'Gundlupet',km:220,dm:240,e:[
+    {n:'Sree Annapoorna',a:'Gundlupet',it:'Ghee Podi Idli + Filter Coffee',w:'7:00 AM – 1:00 PM',bf:.78,c:'Medium',det:4,ph:'08229-232500',mp:'https://maps.google.com/?q=Sree+Annapoorna+Gundlupet',wb:'Bandipur stop — fresh idlis and strong coffee.',wg:'Good morning window.',we:'Just opened — coffee ready.',wc:'Highway dhabas ahead.',nb:'Junior Kuppanna (600m).'}
+  ]},
+  {city:'Ooty',km:295,dm:360,e:[
+    {n:'Chandan Sweets',a:'Ooty',it:'Ooty Varkey + Homemade Chocolate',w:'9:00 AM – 6:00 PM',bf:.90,c:'High',det:3,ph:'0423-2444321',mp:'https://maps.google.com/?q=Chandan+Sweets+Ooty',wb:'Welcome to Ooty — varkey baked fresh, chocolates in-house.',wg:'Good stock, chocolates sell out by 5 PM.',we:'Opening soon.',wc:'King Star Bakery (300m).',nb:'King Star Bakery (300m).'}
+  ]}
+]},
+'bangalore-davanagere':{totalKm:270,totalMins:270,wp:[
+  {city:'Nelamangala',km:28,dm:40,e:[
+    {n:'Kamat Upachar',a:'Nelamangala',it:'Ghee Idli + Masala Vada + Filter Coffee',w:'6:00 AM – 11:00 AM',bf:.85,c:'High',det:0,ph:'080-27726600',mp:'https://maps.google.com/?q=Kamat+Upachar+Nelamangala',wb:'First stop on NH-48 — steaming idlis and strong filter coffee.',wg:'Good morning window.',we:'Coffee ready, idlis in 10 mins.',wc:'A2B Nelamangala (300m).',nb:'A2B Nelamangala (300m).'}
+  ]},
+  {city:'Tumkur',km:70,dm:90,e:[
+    {n:'Sri Siddaganga Sweets',a:'Tumkur',it:'Tumkur Peda + Khara Boondi',w:'8:00 AM – 8:00 PM',bf:.82,c:'High',det:3,ph:'0816-2271234',mp:'https://maps.google.com/?q=Sri+Siddaganga+Sweets+Tumkur',wb:'Midway sweet stop — peda fresh, boondi crispy.',wg:'Long hours, consistent quality.',we:'Just opened.',wc:'Rarely closed.',nb:'Sri Venkateswara Sweets (200m).'}
+  ]},
+  {city:'Chitradurga',km:200,dm:195,e:[
+    {n:'Pavithra Darshini',a:'Chitradurga',it:'Obbattu (Holige) + Kesari Bath',w:'7:30 AM – 2:30 PM',bf:.78,c:'Medium',det:5,ph:'08194-222456',mp:'https://maps.google.com/?q=Pavithra+Darshini+Chitradurga',wb:'Holige with jaggery filling, freshly made before noon.',wg:'Still fresh batches available.',we:'Kesari bath first, holige in 10 mins.',wc:'Hotel Mayura Chitradurga (1km).',nb:'Hotel Mayura Chitradurga (1km).'}
+  ]},
+  {city:'Davanagere',km:270,dm:270,e:[
+    {n:'Davangere Benne Dosa — P Bheemanna',a:'Davanagere',it:'Benne Dosa + White Butter + Palya',w:'6:30 AM – 12:00 PM',bf:.95,c:'High',det:3,ph:'08192-255678',mp:'https://maps.google.com/?q=Bheemanna+Benne+Dosa+Davanagere',wb:'Legendary benne dosa — white butter loaded, palya perfectly spiced.',wg:'Quality holds till noon.',we:'First batch — freshest butter.',wc:'Sri Renuka Sweets (500m) open till evening.',nb:'Sri Renuka Sweets (500m).'},
+    {n:'Sri Renuka Sweets',a:'Davanagere',it:'Khova Burfi + Dry Fruit Ladoo',w:'9:00 AM – 9:00 PM',bf:.88,c:'High',det:3,ph:'08192-231234',mp:'https://maps.google.com/?q=Sri+Renuka+Sweets+Davanagere',wb:'Best sweets in Davanagere — khova burfi made fresh.',wg:'Long hours, replenished through the day.',we:'Opens 9 AM.',wc:'Very rare closure.',nb:'Sri Padma Restaurant (300m).'}
+  ]}
+]},
+'bangalore-hubli':{totalKm:412,totalMins:420,wp:[
+  {city:'Nelamangala',km:28,dm:40,e:[
+    {n:'Kamat Upachar',a:'Nelamangala',it:'Ghee Idli + Filter Coffee',w:'6:00 AM – 11:00 AM',bf:.85,c:'High',det:0,ph:'080-27726600',mp:'https://maps.google.com/?q=Kamat+Upachar+Nelamangala',wb:'First stop on NH-48 — strong filter coffee and idlis.',wg:'Good morning window.',we:'Coffee ready now.',wc:'A2B Nelamangala (300m).',nb:'A2B Nelamangala (300m).'}
+  ]},
+  {city:'Tumkur',km:70,dm:90,e:[
+    {n:'Sri Siddaganga Sweets',a:'Tumkur',it:'Tumkur Peda + Khara Boondi',w:'8:00 AM – 8:00 PM',bf:.82,c:'High',det:3,ph:'0816-2271234',mp:'https://maps.google.com/?q=Sri+Siddaganga+Sweets+Tumkur',wb:'Mid-morning peda stop — freshly made milk sweet.',wg:'Consistent all day.',we:'Just opened.',wc:'Rarely closed.',nb:'Sri Venkateswara Sweets (200m).'}
+  ]},
+  {city:'Davanagere',km:270,dm:270,e:[
+    {n:'Davangere Benne Dosa — P Bheemanna',a:'Davanagere',it:'Benne Dosa + White Butter',w:'6:30 AM – 12:00 PM',bf:.95,c:'High',det:5,ph:'08192-255678',mp:'https://maps.google.com/?q=Bheemanna+Benne+Dosa+Davanagere',wb:'Legendary midway benne dosa — white butter loaded.',wg:'Quality holds till noon.',we:'First fresh batch.',wc:'Sri Renuka Sweets (500m).',nb:'Sri Renuka Sweets (500m).'}
+  ]},
+  {city:'Dharwad',km:385,dm:390,e:[
+    {n:'Sri Dharwad Pedha Mistanna',a:'Dharwad',it:'Original Dharwad Peda (GI-tagged)',w:'8:00 AM – 9:00 PM',bf:.96,c:'High',det:5,ph:'0836-2447890',mp:'https://maps.google.com/?q=Sri+Dharwad+Pedha+Mistanna+Dharwad',wb:'GI-tagged Dharwad Peda — reduced milk, caramelised. Non-negotiable.',wg:'Fresh pedas all day.',we:'Opening soon.',wc:'Thakur Sweets (300m).',nb:'Thakur Sweets (300m).'}
+  ]},
+  {city:'Hubli',km:412,dm:420,e:[
+    {n:'Kamat Hotel',a:'Hubli',it:'North Karnataka Thali + Jolada Rotti',w:'11:00 AM – 3:30 PM',bf:.88,c:'High',det:5,ph:'0836-2362200',mp:'https://maps.google.com/?q=Kamat+Hotel+Hubli',wb:'Arrival lunch — jolada rotti with enne chutney.',wg:'Good lunch window.',we:'Grab morning coffee from their counter.',wc:'Shri Ram Refreshments (400m).',nb:'Shri Ram Refreshments (400m).'},
+    {n:'Udupi Krishna Bhavan',a:'Hubli',it:'Rava Idli + Khara Bath + Filter Coffee',w:'7:00 AM – 10:30 AM',bf:.84,c:'High',det:3,ph:'0836-2255432',mp:'https://maps.google.com/?q=Udupi+Krishna+Bhavan+Hubli',wb:'Hubli\'s best morning tiffin — rava idli with ghee.',wg:'Morning stock still available.',we:'Opens 7 AM.',wc:'Kamat Hotel (400m).',nb:'Kamat Hotel (400m).'}
+  ]}
+]},
+'bangalore-dharwad':{totalKm:430,totalMins:450,wp:[
+  {city:'Nelamangala',km:28,dm:40,e:[
+    {n:'Kamat Upachar',a:'Nelamangala',it:'Ghee Idli + Filter Coffee',w:'6:00 AM – 11:00 AM',bf:.85,c:'High',det:0,ph:'080-27726600',mp:'https://maps.google.com/?q=Kamat+Upachar+Nelamangala',wb:'First stop NH-48 — strong coffee and idlis.',wg:'Good morning window.',we:'Coffee ready.',wc:'A2B Nelamangala (300m).',nb:'A2B Nelamangala (300m).'}
+  ]},
+  {city:'Tumkur',km:70,dm:90,e:[
+    {n:'Sri Siddaganga Sweets',a:'Tumkur',it:'Tumkur Peda + Khara Boondi',w:'8:00 AM – 8:00 PM',bf:.82,c:'High',det:3,ph:'0816-2271234',mp:'https://maps.google.com/?q=Sri+Siddaganga+Sweets+Tumkur',wb:'Midway peda — freshly made.',wg:'Consistent all day.',we:'Just opened.',wc:'Rarely closed.',nb:'Sri Venkateswara Sweets (200m).'}
+  ]},
+  {city:'Davanagere',km:270,dm:270,e:[
+    {n:'Davangere Benne Dosa — P Bheemanna',a:'Davanagere',it:'Benne Dosa + White Butter',w:'6:30 AM – 12:00 PM',bf:.95,c:'High',det:5,ph:'08192-255678',mp:'https://maps.google.com/?q=Bheemanna+Benne+Dosa+Davanagere',wb:'Iconic midway benne dosa.',wg:'Quality holds till noon.',we:'First fresh batch.',wc:'Sri Renuka Sweets (500m).',nb:'Sri Renuka Sweets (500m).'}
+  ]},
+  {city:'Dharwad',km:430,dm:450,e:[
+    {n:'Sri Dharwad Pedha Mistanna',a:'Dharwad',it:'Original Dharwad Peda (GI-tagged)',w:'8:00 AM – 9:00 PM',bf:.96,c:'High',det:5,ph:'0836-2447890',mp:'https://maps.google.com/?q=Sri+Dharwad+Pedha+Mistanna+Dharwad',wb:'Destination — GI-tagged Dharwad Peda, freshly made.',wg:'All-day freshness.',we:'Opening soon.',wc:'Thakur Sweets (300m).',nb:'Thakur Sweets (300m).'},
+    {n:'Thakur Sweets',a:'Dharwad',it:'Dharwad Peda + Kaju Katli',w:'9:00 AM – 9:00 PM',bf:.90,c:'High',det:3,ph:'0836-2448765',mp:'https://maps.google.com/?q=Thakur+Sweets+Dharwad',wb:'Second peda stop — settle the Dharwad peda debate!',wg:'Consistent all day.',we:'Opening in minutes.',wc:'Sri Dharwad Pedha Mistanna (300m).',nb:'Sri Dharwad Pedha Mistanna (300m).'}
+  ]}
+]},
+'dharwad-mysore':{totalKm:465,totalMins:480,wp:[
+  {city:'Hubli',km:27,dm:30,e:[
+    {n:'Udupi Krishna Bhavan',a:'Hubli',it:'Rava Idli + Filter Coffee',w:'7:00 AM – 10:30 AM',bf:.84,c:'High',det:3,ph:'0836-2255432',mp:'https://maps.google.com/?q=Udupi+Krishna+Bhavan+Hubli',wb:'Start the long drive with Hubli\'s best morning tiffin.',wg:'Good morning window.',we:'Opens 7 AM.',wc:'Kamat Hotel (400m).',nb:'Kamat Hotel (400m).'}
+  ]},
+  {city:'Davanagere',km:120,dm:120,e:[
+    {n:'Davangere Benne Dosa — P Bheemanna',a:'Davanagere',it:'Benne Dosa + White Butter + Palya',w:'6:30 AM – 12:00 PM',bf:.95,c:'High',det:3,ph:'08192-255678',mp:'https://maps.google.com/?q=Bheemanna+Benne+Dosa+Davanagere',wb:'~2 hrs in — legendary benne dosa, perfect mid-morning stop.',wg:'Quality holds till noon.',we:'First fresh batch.',wc:'Sri Renuka Sweets (500m).',nb:'Sri Renuka Sweets (500m).'},
+    {n:'Sri Renuka Sweets',a:'Davanagere',it:'Khova Burfi + Dry Fruit Ladoo',w:'9:00 AM – 9:00 PM',bf:.88,c:'High',det:3,ph:'08192-231234',mp:'https://maps.google.com/?q=Sri+Renuka+Sweets+Davanagere',wb:'Sweet stop — khova burfi freshly made.',wg:'Long hours.',we:'Opens 9 AM.',wc:'Sri Padma (300m).',nb:'Sri Padma Restaurant (300m).'}
+  ]},
+  {city:'Chitradurga',km:200,dm:200,e:[
+    {n:'Pavithra Darshini',a:'Chitradurga',it:'Obbattu (Holige) + Kesari Bath',w:'7:30 AM – 2:30 PM',bf:.78,c:'Medium',det:5,ph:'08194-222456',mp:'https://maps.google.com/?q=Pavithra+Darshini+Chitradurga',wb:'~3.5 hrs in — holige with jaggery filling, great break.',wg:'Still fresh till 2:30 PM.',we:'Kesari bath first.',wc:'Hotel Mayura (1km).',nb:'Hotel Mayura Chitradurga (1km).'}
+  ]},
+  {city:'Tumkur',km:335,dm:340,e:[
+    {n:'Sri Siddaganga Sweets',a:'Tumkur',it:'Tumkur Peda + Khara Boondi',w:'8:00 AM – 8:00 PM',bf:.82,c:'High',det:3,ph:'0816-2271234',mp:'https://maps.google.com/?q=Sri+Siddaganga+Sweets+Tumkur',wb:'~5.5 hrs in — sweet pit stop, peda freshly made.',wg:'Long hours.',we:'Full range from 8 AM.',wc:'Rarely closed.',nb:'Sri Venkateswara Sweets (200m).'}
+  ]},
+  {city:'Mandya',km:420,dm:420,e:[
+    {n:'Sri Rama Sweets',a:'Mandya',it:'Jaggery Ladoo + Peanut Chikki',w:'8:30 AM – 3:00 PM',bf:.74,c:'Medium',det:0,ph:'08232-222345',mp:'https://maps.google.com/?q=Sri+Rama+Sweets+Mandya',wb:'~7 hrs in — sweet final stop before Mysore.',wg:'Good stock through mid-day.',we:'Chikki available earliest.',wc:'Sri Krishna Sweets (300m).',nb:'Sri Krishna Sweets (300m).'}
+  ]},
+  {city:'Mysore',km:465,dm:480,e:[
+    {n:'Guru Sweet Mart',a:'Mysore',it:'Mysore Pak Special + Badhusha',w:'9:00 AM – 7:00 PM',bf:.95,c:'High',det:5,ph:'0821-2441234',mp:'https://maps.google.com/?q=Guru+Sweet+Mart+Mysore',wb:'Journey complete — celebrate with GI-tagged Mysore Pak.',wg:'Good stock available.',we:'Almost open.',wc:'Chandrika Sweets (400m).',nb:'Chandrika Sweets (400m).'}
+  ]}
+]},
+'davanagere-hubli':{totalKm:100,totalMins:90,wp:[
+  {city:'Dharwad',km:70,dm:65,e:[
+    {n:'Sri Dharwad Pedha Mistanna',a:'Dharwad',it:'Original Dharwad Peda (GI-tagged)',w:'8:00 AM – 9:00 PM',bf:.96,c:'High',det:5,ph:'0836-2447890',mp:'https://maps.google.com/?q=Sri+Dharwad+Pedha+Mistanna+Dharwad',wb:'The GI-tagged Dharwad Peda freshly made.',wg:'All-day freshness.',we:'Opening soon.',wc:'Thakur Sweets (300m).',nb:'Thakur Sweets (300m).'}
+  ]},
+  {city:'Hubli',km:100,dm:90,e:[
+    {n:'Udupi Krishna Bhavan',a:'Hubli',it:'Rava Idli + Filter Coffee',w:'7:00 AM – 10:30 AM',bf:.84,c:'High',det:3,ph:'0836-2255432',mp:'https://maps.google.com/?q=Udupi+Krishna+Bhavan+Hubli',wb:'Hubli morning tiffin — rava idli with ghee.',wg:'Morning stock available.',we:'Opens 7 AM.',wc:'Kamat Hotel (400m).',nb:'Kamat Hotel (400m).'}
+  ]}
+]},
+'mumbai-pune':{totalKm:150,totalMins:150,wp:[
+  {city:'Khopoli',km:60,dm:60,e:[
+    {n:'Khopoli Dhaba Row',a:'Khopoli',it:'Vada Pav + Kanda Bhaji',w:'6:00 AM – 11:00 AM',bf:.85,c:'High',det:0,ph:'02192-265500',mp:'https://maps.google.com/?q=Khopoli+Dhaba+Expressway',wb:'Morning highway stop — vada pav oil freshest.',wg:'Past peak but still excellent.',we:'Oil not heated yet — chai available.',wc:'McDonald\'s Expressway (500m) open 24/7.',nb:'McDonald\'s Expressway (500m).'}
+  ]},
+  {city:'Khalapur',km:90,dm:90,e:[
+    {n:'Café Madras',a:'Khalapur',it:'Medu Vada + Filter Coffee',w:'7:30 AM – 12:00 PM',bf:.72,c:'Medium',det:2,ph:'02192-272200',mp:'https://maps.google.com/?q=Cafe+Madras+Khalapur',wb:'Mid-morning — vada batter fermented overnight, coffee strong.',wg:'Quality consistent.',we:'Coffee ready, vadas in 20 mins.',wc:'Prasad Pure Veg (400m).',nb:'Prasad Pure Veg (400m).'}
+  ]},
+  {city:'Pune',km:150,dm:150,e:[
+    {n:'Chitale Bandhu',a:'Pune (Deccan)',it:'Bakarwadi + Shrikhand',w:'9:00 AM – 9:00 PM',bf:.94,c:'High',det:5,ph:'020-25533488',mp:'https://maps.google.com/?q=Chitale+Bandhu+Deccan+Pune',wb:'Arrival treat — fresh bakarwadi, chilled shrikhand.',wg:'Long hours, consistent quality.',we:'Vaishali (300m) for morning options.',wc:'Very rare closure.',nb:'Vaishali Restaurant (300m).'},
+    {n:'Vaishali Restaurant',a:'Pune (FC Road)',it:'Misal Pav + Filter Coffee',w:'8:00 AM – 11:30 PM',bf:.87,c:'High',det:5,ph:'020-25536376',mp:'https://maps.google.com/?q=Vaishali+Restaurant+Pune',wb:'Pune institution since 1958 — spicy misal pav, always fresh.',wg:'Long hours.',we:'Open from 8 AM.',wc:'Almost never closed.',nb:'Cafe Good Luck (600m).'}
+  ]}
+]}
+};
+
+// ── Route matching ────────────────────────────────────────────────
+function cityMatch(a,b){return a.indexOf(b)>=0||b.indexOf(a)>=0;}
+function getMatch(from,to){
+  var f=from.trim().toLowerCase(),t=to.trim().toLowerCase();
+  var keys=Object.keys(ROUTE_META);
+  for(var i=0;i<keys.length;i++){var p=keys[i].split('-');if(cityMatch(f,p[0])&&cityMatch(t,p[1]))return{key:keys[i],rev:false};}
+  for(var j=0;j<keys.length;j++){var q=keys[j].split('-');if(cityMatch(t,q[0])&&cityMatch(f,q[1]))return{key:keys[j],rev:true};}
+  return null;
+}
+
+function buildStops(from,to,dep){
+  var match=getMatch(from,to);
+  if(!match) return buildFallback(from,to,dep);
+  var meta=ROUTE_META[match.key];
+  var wps=meta.wp.slice();
+  if(match.rev){
+    wps=wps.slice().reverse();
+    var total=meta.totalMins;
+    for(var i=0;i<wps.length;i++) wps[i]={city:wps[i].city,km:wps[i].km,dm:total-wps[i].dm,e:wps[i].e};
+  }
+  var stops=[];
+  for(var wi=0;wi<wps.length;wi++){
+    var wp=wps[wi];
+    for(var ei=0;ei<wp.e.length;ei++){
+      var e=wp.e[ei];
+      var arr=addMins(dep,wp.dm+(e.det||0));
+      var st=winStatus(arr,e.w);
+      var fr=e.bf;
+      if(st==='best')fr=Math.min(.99,fr+.04);
+      else if(st==='good')fr=Math.max(.55,fr-.08);
+      else if(st==='closed')fr=0;
+      else fr=Math.max(.48,fr-.18);
+      var why=st==='best'?e.wb:st==='good'?e.wg:st==='early'?e.we:e.wc;
+      stops.push({name:e.n,area:e.a,item:e.it,window:e.w,freshness:fr,conf:e.c,det:e.det||0,special:e.sp||'',phone:e.ph,maps:e.mp,nearby:e.nb,why:why,status:st,arrHHMM:arr,arrivalTime:fmt12(arr),driveMin:wp.dm+(e.det||0)});
+    }
+  }
+  return{stops:stops,meta:meta};
+}
+
+function buildFallback(from,to,dep){
+  var raw=[
+    {n:'Local Tiffins · '+from,a:from,it:'Ghee Idli + Filter Coffee',w:'7:00 AM – 10:30 AM',bf:.82,c:'Medium',det:0,ph:'N/A',mp:'https://maps.google.com/?q=tiffin+'+encodeURIComponent(from),wb:'Fresh morning batch.',wg:'Still good.',we:'Opening soon.',wc:'Try nearby.',nb:'Ask locals.',dm:25},
+    {n:'Highway Sweets',a:'Midway',it:'Local Sweets + Chai',w:'8:00 AM – 6:00 PM',bf:.70,c:'Medium',det:5,ph:'N/A',mp:'https://maps.google.com/?q=sweets+highway',wb:'Midway sweet stop.',wg:'Stock available.',we:'Opening soon.',wc:'Petrol bunk ahead.',nb:'Petrol bunk snacks.',dm:90},
+    {n:'Arrival Sweets · '+to,a:to,it:'Local Mithai + Chai',w:'9:00 AM – 8:00 PM',bf:.75,c:'Medium',det:0,ph:'N/A',mp:'https://maps.google.com/?q=sweets+'+encodeURIComponent(to),wb:'Perfect arrival treat.',wg:'Good timing.',we:'Opening soon.',wc:'Multiple shops nearby.',nb:'Ask hotel staff.',dm:150}
+  ];
+  var stops=[];
+  for(var i=0;i<raw.length;i++){
+    var e=raw[i];
+    var arr=addMins(dep,e.dm);
+    var st=winStatus(arr,e.w);
+    var fr=e.bf;
+    if(st==='best')fr=Math.min(.99,fr+.04);else if(st==='good')fr=Math.max(.55,fr-.08);else if(st==='closed')fr=0;else fr=Math.max(.48,fr-.18);
+    stops.push({name:e.n,area:e.a,item:e.it,window:e.w,freshness:fr,conf:e.c,det:0,special:'',phone:e.ph,maps:e.mp,nearby:e.nb,why:st==='best'?e.wb:st==='good'?e.wg:st==='early'?e.we:e.wc,status:st,arrHHMM:arr,arrivalTime:fmt12(arr),driveMin:e.dm});
+  }
+  return{stops:stops,meta:{totalKm:0,totalMins:180}};
+}
+
+function buildTips(stops){
+  var best=stops[0];
+  for(var i=1;i<stops.length;i++) if(stops[i].freshness>best.freshness) best=stops[i];
+  var open=stops.filter(function(s){return s.status==='best'||s.status==='good';});
+  var sensitive=open.length?open[0]:null;
+  var bad=null;
+  for(var j=0;j<stops.length;j++){if(stops[j].status==='closed'||stops[j].status==='early'){bad=stops[j];break;}}
+  if(!bad){var worst=stops[0];for(var k=1;k<stops.length;k++) if(stops[k].freshness<worst.freshness) worst=stops[k];bad=worst;}
+  return{
+    best:best?best.name+', '+best.area+' — highest freshness':'',
+    sensitive:sensitive?sensitive.name+', '+sensitive.area+' — don\'t miss this window':'',
+    skip:bad?bad.name+' — '+(bad.status==='closed'?'closed at arrival':bad.status==='early'?'too early':'lowest freshness'):''
+  };
+}
+
+// ── Loading ───────────────────────────────────────────────────────
+var STEPS=[[8,'Calculating journey time…'],[22,'Mapping waypoints…'],[42,'Computing arrival ETAs…'],[60,'Scoring freshness windows…'],[78,'Applying crowd patterns…'],[92,'Building your plan…']];
+
+function startPlan(){
+  var from=document.getElementById('inFrom').value.trim();
+  var to=document.getElementById('inTo').value.trim();
+  var dep=document.getElementById('inTime').value;
+  if(!from||!to) return;
+  show('scLoading');
+  var ldStep=document.getElementById('ldStep'),ldFill=document.getElementById('ldFill');
+  var si=0;
+  var iv=setInterval(function(){if(si<STEPS.length){ldFill.style.width=STEPS[si][0]+'%';ldStep.textContent=STEPS[si][1];si++;}},430);
+  var result=buildStops(from,to,dep);
+  var tips=buildTips(result.stops);
+  clearInterval(iv);
+  ldFill.style.width='100%';ldStep.textContent='Ready!';
+  setTimeout(function(){renderResult(from,to,dep,result,tips);show('scResult');},350);
+}
+
+// ── Render helpers ────────────────────────────────────────────────
+function scClass(s){return s==='best'?'sc-best':s==='good'?'sc-good':s==='closed'?'sc-closed':'sc-miss';}
+function fpCls(f,s){return s==='closed'?'fp-closed':f>=.85?'fp-best':f>=.65?'fp-good':'fp-miss';}
+function fpLbl(f,s){if(s==='closed')return'⛔ Likely closed';if(s==='early')return'⏳ Too early';return f>=.85?'🟢 Best time — fresh batch':f>=.65?'🟡 Good timing':'🔴 Not ideal';}
+function confLbl(c){return c==='High'?'✦ Highly reliable':c==='Medium'?'~ Based on patterns':'○ May vary';}
+
+function shareStop(n,t,it,mp,ph){var txt='🍬 *Highway Food Bytes*\n*'+n+'*\n🍽 '+it+'\n⏰ Arrive by: '+t+'\n📍 '+mp+'\n📞 '+ph+'\n\nShared via Highway Food Bytes';window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');}
+function shareAll(from,to,sj){var stops=JSON.parse(sj);var txt='🗺 *Highway Food Bytes — '+from+' → '+to+'*\n\n';for(var i=0;i<stops.length;i++) txt+='*Stop '+(i+1)+': '+stops[i].n+', '+stops[i].a+'*\n🍽 '+stops[i].it+'\n⏰ '+stops[i].at+'\n📍 '+stops[i].mp+'\n\n';txt+='Shared via Highway Food Bytes 🛣️';window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');}
+function submitFeedback(btn,msg){var bs=document.querySelectorAll('.fbtn');for(var i=0;i<bs.length;i++) bs[i].classList.remove('sel');btn.classList.add('sel');document.getElementById('fbThanks').textContent=msg;}
+function submitFeedbackText(){var t=document.getElementById('fbText').value.trim();document.getElementById('fbThanks').textContent=t?'✅ Feedback sent! Thank you 🙏':'✅ Thanks for the rating!';document.getElementById('fbText').value='';}
+
+function renderResult(from,to,dep,result,tips){
+  var stops=result.stops,meta=result.meta;
+  var closedC=0,earlyC=0;
+  for(var i=0;i<stops.length;i++){if(stops[i].status==='closed')closedC++;if(stops[i].status==='early')earlyC++;}
+  var arrTime=fmt12(addMins(dep,meta.totalMins));
+
+  var h='<div class="res-header">'
+    +'<div class="res-route-lbl">Your sweet journey</div>'
+    +'<div class="res-title">'+from+' → '+to+'</div>'
+    +'<div class="res-meta">'
+    +'<span class="rm">🕐 Departs '+fmt12(dep)+'</span>'
+    +'<span class="rm">🏁 Arrives ~'+arrTime+'</span>'
+    +(meta.totalKm?'<span class="rm">📏 ~'+meta.totalKm+' km</span>':'')
+    +'<span class="rm">⏱ ~'+fmtDur(meta.totalMins)+'</span>'
+    +'<span class="rm">🛑 '+stops.length+' stops</span>'
+    +(closedC?'<span class="rm rm-warn">⛔ '+closedC+' closed</span>':'')
+    +(earlyC?'<span class="rm rm-early">⏳ '+earlyC+' too early</span>':'')
+    +'</div></div>';
+
+  if(meta.totalKm){
+    h+='<div class="eta-bar">'
+      +'<div class="eta-item"><div class="eta-val">~'+meta.totalKm+' km</div><div class="eta-lbl">Distance</div></div>'
+      +'<div class="eta-item"><div class="eta-val">~'+fmtDur(meta.totalMins)+'</div><div class="eta-lbl">Drive time</div></div>'
+      +'<div class="eta-item"><div class="eta-val">'+arrTime+'</div><div class="eta-lbl">Est. arrival</div></div>'
+      +'<div class="eta-item"><div class="eta-val">'+stops.length+'</div><div class="eta-lbl">Stops</div></div>'
+      +'</div>';
+  }
+
+  if(closedC||earlyC){
+    h+='<div class="notice"><strong>⏱ Timing heads-up</strong>'
+      +'Based on your '+fmt12(dep)+' departure: '
+      +(closedC?closedC+' stop(s) will be closed':'')
+      +(closedC&&earlyC?' and ':'')
+      +(earlyC?earlyC+' stop(s) too early':'')
+      +'. Nearby alternatives shown on each card.</div>';
+  }
+
+  var shareStops=[];
+  for(var si=0;si<stops.length;si++){
+    var s=stops[si];
+    var emo=stopEmoji(s.item,s.special);
+    var isMNS=s.special==='mns';
+    var isLeg=s.special==='legend';
+    var badge='';
+    if(isMNS)badge='<span class="sbadge sb-mns">⭐ Hidden Gem</span>';
+    else if(isLeg)badge='<span class="sbadge sb-legend">⭐ Est. 1926</span>';
+    else if(s.status==='best')badge='<span class="sbadge sb-best">✅ Perfect timing</span>';
+    else if(s.status==='closed')badge='<span class="sbadge sb-closed">⛔ Closed</span>';
+    else if(s.status==='early')badge='<span class="sbadge sb-early">⏳ Too early</span>';
+    var callHref=s.phone!=='N/A'?'tel:'+s.phone:'#';
+    var needNearby=(s.status==='closed'||s.status==='early')&&s.nearby;
+    shareStops.push({n:s.name,a:s.area,it:s.item,at:s.arrivalTime,mp:s.maps});
+
+    h+='<div class="stop-card '+scClass(s.status)+'">'
+      +'<div class="s-header">'
+      +'<div class="s-emoji">'+emo+'</div>'
+      +'<div class="s-header-info">'
+      +'<div class="s-name">'+s.name+'</div>'
+      +'<div class="s-area">'+s.area+(isLeg?' · 🏆 Legendary Mysore Pak':'')+'</div>'
+      +'</div>'
+      +'<span class="snum">Stop '+(si+1)+' · '+fmtDur(s.driveMin)+'</span>'
+      +(badge?'&nbsp;'+badge:'')
+      +'</div>'
+      +'<div class="sbody">'
+      +'<div class="srow"><div class="sico">⏰</div><div><div class="slbl">ETA at stop</div>'
+      +'<div class="sval"><strong>'+s.arrivalTime+'</strong> <span style="color:#8a9a7a;font-size:12px;">· Open: '+s.window+'</span></div></div></div>'
+      +'<div class="srow"><div class="sico">🍽</div><div><div class="slbl">Order</div>'
+      +'<div class="sval">'+s.item+(s.det?' <span style="font-size:11px;color:#8a9a7a;">+'+s.det+' min detour</span>':'')+'</div></div></div>'
+      +'<div class="srow"><div class="sico">📊</div><div><div class="slbl">Timing</div>'
+      +'<div class="sval"><div class="fpill '+fpCls(s.freshness,s.status)+'">'+fpLbl(s.freshness,s.status)+'</div>'
+      +' <span style="font-size:11px;color:#8a9a7a;">'+confLbl(s.conf)+'</span></div></div></div>'
+      +'<div class="srow"><div class="sico">⭐</div><div><div class="slbl">Guide tip</div><div class="sval">'+s.why+'</div></div></div>'
+      +'<div class="srow"><div class="sico">📞</div><div><div class="slbl">Contact</div>'
+      +'<div class="sval">'+(s.phone!=='N/A'?'<a href="tel:'+s.phone+'">'+s.phone+'</a>':s.phone)+'</div></div></div>'
+      +(isMNS?'<div class="mns-alert"><div class="mns-alert-ico">🔥</div><div class="mns-alert-txt">ONE batch per day · 2:30–3:30 PM only · Sells out in 2 hrs · No second batch ever made!</div></div>':'')
+      +(needNearby?'<div class="nearby-box"><div class="nearby-lbl">📍 Nearby alternative</div>'+s.nearby+'</div>':'')
+      +'<div class="action-row">'
+      +'<button class="abtn abtn-map" onclick="window.open(\''+s.maps+'\',\'_blank\')">🗺 Directions</button>'
+      +'<button class="abtn abtn-call" onclick="window.location=\''+callHref+'\'">📞 Call</button>'
+      +'<button class="abtn abtn-share" onclick="shareStop(\''+s.name.replace(/'/g,"\\'")+'\',' +'\''+s.arrivalTime+'\',\''+s.item.replace(/'/g,"\\'")+'\',\''+s.maps+'\',\''+s.phone+'\')">💬 Share</button>'
+      +'</div></div></div>';
+  }
+
+  h+='<div class="tips-card"><div class="tips-title">⚡ Quick Trip Tips</div>'
+    +(tips.best?'<div class="tip-row"><div class="tip-lbl">🏆 Best stop</div><div class="tip-val">'+tips.best+'</div></div>':'')
+    +(tips.sensitive?'<div class="tip-row"><div class="tip-lbl">⏰ Most time-sensitive</div><div class="tip-val">'+tips.sensitive+'</div></div>':'')
+    +(tips.skip?'<div class="tip-row"><div class="tip-lbl">⚠️ Skip if late</div><div class="tip-val">'+tips.skip+'</div></div>':'')
+    +'</div>';
+
+  var sj=JSON.stringify(shareStops).replace(/"/g,'&quot;');
+  h+='<button class="share-btn" onclick="shareAll(\''+from+'\',\''+to+'\',this.dataset.s)" data-s="'+sj+'">💬 Share full itinerary on WhatsApp</button>';
+  h+='<div class="ai-badge"><div class="ai-dot"></div> Powered by Highway Food Bytes · Real ETA Engine</div>';
+  h+='<div class="fb-card"><div class="fb-title">💬 How was this plan?</div>'
+    +'<div class="fb-btns">'
+    +'<button class="fbtn fbtn-yes" onclick="submitFeedback(this,\'👍 Awesome!\')">👍 Loved it</button>'
+    +'<button class="fbtn fbtn-ok"  onclick="submitFeedback(this,\'🙏 We\'ll improve!\')">😐 OK</button>'
+    +'<button class="fbtn fbtn-no"  onclick="submitFeedback(this,\'📝 Tell us more.\')">👎 Needs work</button>'
+    +'</div>'
+    +'<textarea id="fbText" class="fb-input" rows="2" placeholder="Any stop missing? Wrong timing? Tell us…"></textarea>'
+    +'<button class="fb-submit" onclick="submitFeedbackText()">Send feedback →</button>'
+    +'<div class="fb-thanks" id="fbThanks"></div></div>';
+
+  document.getElementById('resultContent').innerHTML=h;
+  document.getElementById('scResult').scrollTop=0;
+}
+
+// ── Power user ────────────────────────────────────────────────────
+var pwrPin='1234',pdActiveFilter='all';
+var PD_STOPS=[
+  {n:'Shri Janardhan Hotel',r:'Ramanagara',score:96,rev:412,t:'up'},
+  {n:'Davangere Benne Dosa',r:'Davanagere',score:91,rev:276,t:'up'},
+  {n:'Sri Dharwad Pedha Mistanna',r:'Dharwad',score:93,rev:201,t:'up'},
+  {n:'Maddur Vade Corner',r:'Maddur',score:88,rev:318,t:'up'},
+  {n:'Guru Sweet Mart',r:'Mysore',score:89,rev:356,t:'stable'},
+  {n:'Sri Siddaganga Sweets',r:'Tumkur',score:79,rev:187,t:'stable'},
+  {n:'Pavithra Darshini',r:'Chitradurga',score:71,rev:143,t:'dn'},
+  {n:'Café Madras',r:'Khalapur',score:67,rev:98,t:'dn'}
+];
+var PD_CMTS=[
+  {route:'Bangalore → Mysore',time:'2h ago',tag:'praise',text:'Shri Janardhan at 8:20 AM — ghee batch just out. Perfect!'},
+  {route:'Dharwad → Mysore',time:'4h ago',tag:'missing',text:'Ranibennur missing — add Sri Basaveshwar Sweets there.'},
+  {route:'Bangalore → Hubli',time:'6h ago',tag:'timing',text:'Bheemanna closed at 12:45 PM. Window should end at 12 PM.'},
+  {route:'Mumbai → Pune',time:'8h ago',tag:'wrong',text:'Café Madras phone disconnected. Please update.'},
+  {route:'Bangalore → Coorg',time:'12h ago',tag:'praise',text:'ETA bar was spot on — 5.5 hrs exactly. Great app!'},
+  {route:'Dharwad → Mysore',time:'1d ago',tag:'timing',text:'Pavithra Darshini closed at 3 PM, not 2:30.'},
+];
+
+function openPwr(){document.getElementById('pwrOverlay').classList.add('open');document.getElementById('pwrLogin').style.display='block';document.getElementById('pwrDash').style.display='none';document.getElementById('pwrPin').value='';document.getElementById('pwrErr').style.display='none';}
+function closePwr(){document.getElementById('pwrOverlay').classList.remove('open');}
+function doLogin(){var pin=document.getElementById('pwrPin').value;if(pin===pwrPin){document.getElementById('pwrErr').style.display='none';document.getElementById('pwrLogin').style.display='none';document.getElementById('pwrDash').style.display='block';document.getElementById('pwrBtn').classList.add('on');initPwrDash();}else{document.getElementById('pwrErr').style.display='block';document.getElementById('pwrPin').value='';}}
+function doLogout(){document.getElementById('pwrDash').style.display='none';document.getElementById('pwrLogin').style.display='block';document.getElementById('pwrBtn').classList.remove('on');document.getElementById('pwrPin').value='';closePwr();}
+function changePin(){var np=document.getElementById('newPin').value;if(np.length===4&&/^\d{4}$/.test(np)){pwrPin=np;document.getElementById('newPin').value='';document.getElementById('pinMsg').textContent='✅ PIN updated!';setTimeout(function(){document.getElementById('pinMsg').textContent='';},2500);}else{document.getElementById('pinMsg').textContent='⚠️ Enter a valid 4-digit PIN.';}}
+function pTab(name,el){var tabs=document.querySelectorAll('.ptab');for(var i=0;i<tabs.length;i++) tabs[i].classList.remove('on');el.classList.add('on');var panels=document.querySelectorAll('.pwr-panel');for(var j=0;j<panels.length;j++) panels[j].classList.remove('on');document.getElementById('pp-'+name).classList.add('on');}
+function pdFilter(f,el){pdActiveFilter=f;var chips=document.querySelectorAll('#pp-filters .pfchip');for(var i=0;i<chips.length;i++) chips[i].classList.remove('on');el.classList.add('on');renderPdCmts();}
+function renderPdCmts(){var list=pdActiveFilter==='all'?PD_CMTS:PD_CMTS.filter(function(c){return c.tag===pdActiveFilter;});var out='';for(var i=0;i<list.length;i++){var c=list[i];var tl={praise:'Praise',timing:'Timing',missing:'Missing stop',wrong:'Wrong info'}[c.tag]||c.tag;out+='<div class="pcmt"><div class="pcmt-meta"><span style="font-size:12px;font-weight:700;">'+c.route+'</span><span style="font-size:11px;color:#8a9a7a;">'+c.time+'</span><span class="pctag pct-'+c.tag+'">'+tl+'</span></div><div style="font-size:12px;color:#6b7a5e;line-height:1.5;">'+c.text+'</div></div>';}document.getElementById('pp-comments-list').innerHTML=out||'<div style="font-size:13px;color:#8a9a7a;text-align:center;padding:18px;">No comments for this filter.</div>';}
+function initPwrDash(){var out='';for(var i=0;i<PD_STOPS.length;i++){var s=PD_STOPS[i];var sc=s.score>=85?'ps-g':s.score>=70?'ps-a':'ps-r';var tr=s.t==='up'?'<span style="color:#3B6D11;">↑</span>':s.t==='dn'?'<span style="color:#A32D2D;">↓</span>':'<span style="color:#8a9a7a;">→</span>';out+='<div class="pstop-row"><div style="flex:1;"><div style="font-size:13px;font-weight:700;">'+s.n+'</div><div style="font-size:11px;color:#8a9a7a;">'+s.r+' · '+s.rev+' reviews '+tr+'</div></div><span class="pscore '+sc+'">'+s.score+'%</span></div>';}document.getElementById('pp-stop-list').innerHTML=out;renderPdCmts();}
+</script>
+</body>
+</html>
